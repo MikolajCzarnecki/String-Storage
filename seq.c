@@ -5,18 +5,16 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-/*Ciagi sa przechowywane w drzewie z trzema synami.
+/*Sequences are stored in tree where each node has three sons.
 *
-* Każdy węzel ma pole abstract_class_name w ktorym znajduje się jego
-* nazwa klasy abstrakcji.
+* Each node stores abstract_class_name value where its
+* abstraction class name is stored.
 *
-* abstract_class zawiera numer klasy abstrakcji
-* w której znajduje się dany węzeł. Ciagi bez klasy abstrakcji maja domyslnie ta
-* wartosć zapisana na -1.
+* abstract_class stores number of abstraction class
+* in which node belongs. Sequences without abstraction class has this value as -1 in default.
 *
-* abstract_classes_amount jest wskaźnikiem do zmiennej która mówi ile jest
-* obecnie klas abstrakcji w magazynie i jest używana do wybierania numeru
-* abstract_class nowym klasom abstrakcji.
+* abstract_classes_amount is a pointer to variable determining how many abstraction classes are currently in storage
+* and is used to pick number for new abstraction classes.
 */
 typedef struct seq {
     struct seq * next_zero;
@@ -27,8 +25,8 @@ typedef struct seq {
     int * abstract_classes_amount;
 } seq_t;
 
-/*Inicjuje nowa strukture do przechowywania ciagow.
-* Tworzy korzen drzewa w ktorym przechowywane sa ciagi.
+/*Initialize new structure for storing sequences.
+* Creates root of tree where sequences are stored.
 */
 seq_t * seq_new(void) {
     seq_t * return_seq = (seq_t *) malloc(sizeof(seq_t));
@@ -58,9 +56,9 @@ seq_t * seq_new(void) {
     return return_seq;
 }
 
-/*Sprawdza czy w wyrazie nie ma nielegalnych symboli.
-* W takim przypadku zwraca -1 i ustawie errno na EINVAL.
-* Gdy wyraz jest poprawny zwraca 0.
+/*Check if there are any illegal values in sequence.
+* In such case returns -1 and turns errno to EINVAL.
+* For correct sequences returns 0.
 */
 int check_str_for_inval(char const * s) {
     if (!s) {
@@ -84,8 +82,7 @@ int check_str_for_inval(char const * s) {
     return 0;
 }
 
-/*Sprawdza czy z danego węzla magazynu wyrazow p wychodzi węzel dla danego
-* symbolu.
+/*Checks if given node has any sons.
 */
 bool check_seq_for_next(seq_t * p, char val) {
     if (val == '0' && p->next_zero) return true;
@@ -94,12 +91,11 @@ bool check_seq_for_next(seq_t * p, char val) {
     return false;
 }
 
-/*Wykonuje probę dodania węzla za węzel magazynu wyrazow p.
+/*Tries to add son to node p in storage.
 *
-* Jesli taki węzel już tam istnieje zwraca zero i nie robi nic
+* If son already exists returns 0 and does not do anything.
 *
-* W przypadku błedu mallocowania pamieci zwraca -1 i przypisuje
-* errno wartosc ENOMEM.
+* In case of malloc error returns -1 and assigns ENOMEM to errno.
 */
 int new_seq_node(seq_t * p, char new_val) {
     if (new_val != '0' && new_val != '1' && new_val != '2') {
@@ -130,9 +126,8 @@ int new_seq_node(seq_t * p, char new_val) {
     return 1;
 }
 
-/*Zwracanie następnego węzła obrazjącego 0 1 2*/
+/*Return next node representing 0 1 2*/
 seq_t * next_seq(seq_t * p, char next_char) {
-    //printf("\nw next\n");
     if (!p) return NULL;
     switch (next_char) {
         case '0':
@@ -153,8 +148,7 @@ seq_t * next_seq(seq_t * p, char next_char) {
     return NULL;
 }
 
-/*Usuwanie ciągu kończącego się na węźle p i wszystkich ciągów których jest
-* prefiksem rekurencyjnie.
+/*Deleting sequence ending on node p and all sequences which have it as prefix recursively.
 */
 void seq_remove_recur(seq_t * p) {
     if (p != NULL) {
@@ -177,8 +171,8 @@ void seq_remove_recur(seq_t * p) {
     }
 }
 
-/*Dodaje do struktury ciąg s i wszystkie jego prefiksy.
-* W przypadku błędu allokacji usuwa wszystkie dodane już węzły.
+/*Adds to storage sequence s and all of its prefixes.
+* In case of allocation error deletes all already added sequences in procedure.
 */
 int seq_add(seq_t * p, char const * s) {
     if (!p) {
@@ -239,7 +233,7 @@ int seq_add(seq_t * p, char const * s) {
     
 }
 
-/*Usuwa ze struktury ciąg s i wszystkie ciągi których jest prefiksem.*/
+/*Deletes sequence s from structure and all sequences for which s is a prefix.*/
 int seq_remove(seq_t * p, char const * s) {
     if (!p) {
         errno = EINVAL;
@@ -280,7 +274,7 @@ int seq_remove(seq_t * p, char const * s) {
     return 1;
 }
 
-/*Usuwa zbiór ciągów i zwalnia całą używaną przez niego pamięć*/
+/*Deletes whole storage and frees memory used by it.*/
 void seq_delete(seq_t * p) {
     if (p) {
         seq_remove(p, "0");
@@ -294,7 +288,7 @@ void seq_delete(seq_t * p) {
     }
 }
 
-/*Sprawdza czy podany ciag nalezy do ciagu zbiorow.*/
+/*Checks if sequence s is stored in storage p.*/
 int seq_valid(seq_t * p, char const * s) {
     if (check_str_for_inval(s) == -1) return -1;
     if (!p) {
@@ -312,7 +306,7 @@ int seq_valid(seq_t * p, char const * s) {
     return 1;
 }
 
-/* Podmienia imię ciągu przedstawionego w węźle lub ustawia całkowicie nowe.*/
+/* Changes name of sequence in storage or gives it name if it does not have one.*/
 int replace_or_set_seq_name(seq_t * p, char const * n) {
     int n_length = strlen(n) + 1;
     if (p) {
@@ -335,8 +329,8 @@ int replace_or_set_seq_name(seq_t * p, char const * n) {
     return 0;
 }
 
-/*Przechodzi po całej strukturze ustawiając imię n wszystkim węzłom w klasie
-* abstrakcji current_abs_class.
+/*Goes over whole storage changing every sequence from current_abs_class
+* same name n.
 */
 int recur_seq_name(seq_t * p, char const * n, int current_abs_class) {
     int next_zero;
@@ -358,8 +352,8 @@ int recur_seq_name(seq_t * p, char const * n, int current_abs_class) {
     }
 }
 
-/*Ustawia imię n ciągowi s i wszystkim innym ciągom
-* w tej samej klasie abstrakcji.
+/*Changes sequence s's name to n. Switches to this name for every sequence
+* in the same abstraction class.
 */
 int seq_set_name(seq_t * p, char const * s, char const * n) {
     if (!p) {
@@ -415,7 +409,7 @@ int seq_set_name(seq_t * p, char const * s, char const * n) {
     }
 }
 
-/*Zwraca imię przypisane ciągowi s ze struktury p.*/
+/*Returns name of sequence s from storage p.*/
 char const * seq_get_name(seq_t * p, char const * s) {
     if (!p) {
         errno = EINVAL;
@@ -442,7 +436,7 @@ char const * seq_get_name(seq_t * p, char const * s) {
     }
 }
 
-/*Kopiuje string z imieniem n i zwrace go.*/
+/*Copies string with name n and returns it.*/
 char * singular_name(char const * n) {
     int n_len = (int) strlen(n);
 
@@ -459,7 +453,7 @@ char * singular_name(char const * n) {
     return new_name;
 }
 
-/*Łączy dwa stringi z imionami ciągów w jeden który tworzy a następnie zwraca.*/
+/*Combines two strings with name of sequences into one string.*/
 char * merge_names(char const * n1, char const * n2) {
     int new_name_length = 1;
     int n1_len = 0;
@@ -492,7 +486,7 @@ char * merge_names(char const * n1, char const * n2) {
     return new_name;
 }
 
-/*Zmienia klasę abstrakcji i jej nazwę w węźle*/
+/*Changes abstraction class name*/
 int node_change(
     seq_t * p, char const * n1, char const * n2, int abs_class_val
     ) {
@@ -553,8 +547,8 @@ int recur_equiv(
         
 }
 
-/*Ustawia klasę abstrakcji dwóch ciągów na taką samą w strukturze p.
-* Łączy nazwy tych ciągów w jedną.
+/*Changes abstraction class of two sequences to same class
+* and merges name of their classes.
 */
 int seq_equiv(seq_t * p, char const * s1, char const * s2) {
     if (!p) {
